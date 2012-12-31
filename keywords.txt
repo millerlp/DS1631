@@ -1,0 +1,9 @@
+DS1631  KEYWORD1
+stopConversion  KEYWORD2
+startConversion KEYWORD2
+writeConfig KEYWORD2
+readConfig  KEYWORD2
+readTempF   KEYWORD2
+readTempD   KEYWORD2
+readTempOneShot	KEYWORD2
+conversionDone  KEYWORD2
