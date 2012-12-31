@@ -5,7 +5,8 @@
 //  Created by Luke Miller on 12/30/12.
 //  
 //
-
+//  Released into the public domain.
+//  http://github.com/millerlp/DS1631
 
 #include <Wire.h>
 #include <DS1631.h>

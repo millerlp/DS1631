@@ -3,8 +3,8 @@
 //  
 //
 //  Created by Luke Miller on 12/30/12.
-//  
-//
+//  Released into the public domain.
+//  http://github.com/millerlp/DS1631
 
 #ifndef DS1631_h
 #define DS1631_h

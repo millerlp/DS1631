@@ -3,6 +3,11 @@
   from a DS1631 temperature sensor
   Requires the DS1631 library
   
+  
+  Copyright Luke Miller December 30, 2012
+  
+  Released into the public domain. 
+  
   DS1631 pinout:
         1      8
   SDA  --|----|--  Vdd
