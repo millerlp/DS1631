@@ -29,8 +29,8 @@ public:
 private:
     void readT(); 
     int _address;
-    uint8_t highByte;
-    uint8_t lowByte;
+    uint8_t MSByte;
+    uint8_t LSByte;
 };
 
 

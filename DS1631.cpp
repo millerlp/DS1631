@@ -13,8 +13,8 @@
 
 // Initialize Class Variables //////////////////////////////////////////////////
 int _address;
-uint8_t highByte;
-uint8_t lowByte;
+uint8_t MSByte;
+uint8_t LSByte;
 
 // The constructor. Supply the address for the
 // DS1631. The base address is 1001 A2 A1 A0
@@ -96,9 +96,9 @@ void DS1631::readT(){
     Wire.endTransmission();
     Wire.requestFrom(_address,2); // READ 2 bytes
     Wire.available(); // 1st byte
-    highByte = Wire.read(); // read a byte
+    MSByte = Wire.read(); // read a byte
     Wire.available(); // 2nd byte
-    lowByte = Wire.read(); // read a byte
+    LSByte = Wire.read(); // read a byte
 }
 
 // Read the temperature and return a floating point
@@ -108,11 +108,11 @@ float DS1631::readTempF(){
     double T;
     readT();
     // T° processing
-    lowByte = lowByte>>4;
-    if(highByte>=0x80){ //if sign bit is set, then temp is negative
-        highByte = highByte - 256;
+    LSByte = LSByte>>4;
+    if(MSByte>=0x80){ //if sign bit is set, then temp is negative
+        MSByte = highByte - 256;
     }
-    T = (float) highByte + (float) lowByte*0.0625;
+    T = (float) highByte + (float) LSByte*0.0625;
     return T;
 }
 
@@ -144,12 +144,14 @@ float DS1631::readTempOneShot(){
 }
 
 // Read the temperature and return a double value
+// If you divide the returned double value by 16, 
+// you get the temperature value in °C
 int32_t DS1631::readTempD(){ // 1/16°C = 12 Bit accuracy 0.0625°C
     int T_dec;
     int32_t T; 
     readT();
     
-    T=((int32_t)highByte << 8) + lowByte;
+    T=((int32_t)MSByte << 8) + LSByte;
     // T° processing
     if(T >= 0x8000){   // If sign bit is set, then temp is negative
         T = T - 0xFFFF;
