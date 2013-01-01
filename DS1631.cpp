@@ -110,9 +110,9 @@ float DS1631::readTempF(){
     // T° processing
     LSByte = LSByte>>4;
     if(MSByte>=0x80){ //if sign bit is set, then temp is negative
-        MSByte = highByte - 256;
+        MSByte = MSByte - 256;
     }
-    T = (float) highByte + (float) LSByte*0.0625;
+    T = (float) MSByte + (float) LSByte*0.0625;
     return T;
 }
 
