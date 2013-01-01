@@ -160,7 +160,11 @@ float DS1631::readTempOneShot(){
 
 // Read the temperature in 1-shot mode and 
 // return an integer composed of the MSByte
-// and LSByte returned from the DS1631
+// and LSByte returned from the DS1631, stored
+// in two's complement format. The integer
+// would be the most compact way of storing the 
+// temperature data, since it can be stored in
+// two bytes.
 uint16_t DS1631::readTempOneShotInt(){
     long lastMillis = millis();
     uint16_t T;
