@@ -1,6 +1,8 @@
 //
 //  DS1631.cpp
-//  
+//  Functions to write and read to the DS1631 
+//  temperature sensor over I2C (two-wire) 
+//  interface. Requires the Wire library. 
 //
 //  Created by Luke Miller on 12/30/12.
 //  
@@ -69,7 +71,7 @@ void DS1631::startConversion(){
 void DS1631::writeConfig(uint8_t _data){
     stopConversion(); 
     Wire.beginTransmission(_address);
-    Wire.write(0xAC);        // @AC : Access Config
+    Wire.write(0xAC);        // AC : Access Config
     Wire.write(_data);
     Wire.endTransmission();
     startConversion();
@@ -167,8 +169,7 @@ uint16_t DS1631::readTempOneShotInt(){
         while (millis() - lastMillis < 50) {};
     }
     readT(); // Get MSByte and LSByte
-    // Bit-shift the LSByte to save work later
-    LSByte = LSByte >> 4;
+
     T = word(MSByte,LSByte);
     return T;
     // If you take the integer and split it
