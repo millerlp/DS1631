@@ -6,4 +6,5 @@ readConfig  KEYWORD2
 readTempF   KEYWORD2
 readTempD   KEYWORD2
 readTempOneShot	KEYWORD2
+readTempOneShotInt  KEYWORD2
 conversionDone  KEYWORD2

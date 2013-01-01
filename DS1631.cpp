@@ -107,11 +107,24 @@ float DS1631::readTempF(){
     int T_dec;
     double T;
     readT();
-    // T° processing
+    // T° processing. Shift the LSByte right 4 positions
+    // The resulting binary value, converted to base-10 
+    // and multiplied by 0.0625, is the decimal part of 
+    // the temperature. 
     LSByte = LSByte>>4;
-    if(MSByte>=0x80){ //if sign bit is set, then temp is negative
+    
+    // The MSByte (8 bits), converted to base-10, 
+    // represents the whole number portion of the 
+    // temperature. When the left-most bit is 1,
+    // this represents the special case of a 
+    // negative temperature value, so you must 
+    // subtract off 256 to get the whole number
+    // value.
+    if(MSByte>=0x80){ //if sign bit is set
         MSByte = MSByte - 256;
     }
+    // Combine the whole number and fractional
+    // parts of the temperature
     T = (float) MSByte + (float) LSByte*0.0625;
     return T;
 }
@@ -141,6 +154,29 @@ float DS1631::readTempOneShot(){
     // DS1631 back into low-power idle state.
     stopConversion();
     return T;
+}
+
+// Read the temperature in 1-shot mode and 
+// return an integer composed of the MSByte
+// and LSByte returned from the DS1631
+uint16_t DS1631::readTempOneShotInt(){
+    long lastMillis = millis();
+    uint16_t T;
+    startConversion();
+    while ( !conversionDone() ){
+        while (millis() - lastMillis < 50) {};
+    }
+    readT(); // Get MSByte and LSByte
+    // Bit-shift the LSByte to save work later
+    LSByte = LSByte >> 4;
+    T = word(MSByte,LSByte);
+    return T;
+    // If you take the integer and split it
+    // back into its highByte and lowByte using
+    // the highByte() and lowByte() functions of
+    // Arduino, you can quickly calculate the
+    // temperature using the rules outlined above
+    // in the readTempF() function.
 }
 
 // Read the temperature and return a double value
