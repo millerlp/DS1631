@@ -121,13 +121,18 @@ float DS1631::readTempF(){
     // this represents the special case of a 
     // negative temperature value, so you must 
     // subtract off 256 to get the whole number
-    // value.
-    if(MSByte>=0x80){ //if sign bit is set
-        MSByte = MSByte - 256;
+    // value. 
+	// Negative temperature fix contributed by Jürgen Thierry
+	if(MSByte>=0x80)
+    { //if sign bit is set
+        float negMSByte = MSByte - 256;
+        T = (float)negMSByte + (float)LSByte*0.0625;
+        return T;
     }
     // Combine the whole number and fractional
     // parts of the temperature
     T = (float) MSByte + (float) LSByte*0.0625;
+   
     return T;
 }
 
