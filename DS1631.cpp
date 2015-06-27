@@ -5,6 +5,8 @@
 //  interface. Requires the Wire library. 
 //
 //  Created by Luke Miller on 12/30/12.
+//
+//	Modified by Charles Galant on 06/26/15
 //  
 //
 //  Released into the public domain.
@@ -152,7 +154,15 @@ float DS1631::readTempOneShot(){
     while ( !conversionDone() ) {
         // Wait a little while before checking
         // the configuration register again
-        while (millis() - lastMillis < 50) {};
+        long elapsed = 0;
+		while (elapsed < 50) {
+			elapsed = millis() - lastMillis;
+		}
+		if(elapsed > 1000){
+			// Abort polling if conversion takes more
+			// than 1000ms. Instead return integer minimum.
+			return -32768;
+		}
     }
     // Once the temperature conversion is done,
     // read the value from the DS1631
@@ -175,7 +185,17 @@ uint16_t DS1631::readTempOneShotInt(){
     uint16_t T;
     startConversion();
     while ( !conversionDone() ){
-        while (millis() - lastMillis < 50) {};
+		// Wait a little while before checking
+        // the configuration register again
+        long elapsed = 0;
+		while (elapsed < 50) {
+			elapsed = millis() - lastMillis;
+		}
+		if(elapsed > 1000){
+			// Abort polling if conversion takes more
+			// than 1000ms. Instead return integer minimum.
+			return -32768;
+		}
     }
     readT(); // Get MSByte and LSByte
 
