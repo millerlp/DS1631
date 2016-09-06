@@ -7,7 +7,7 @@
 //  Created by Luke Miller on 12/30/12.
 //
 //	Modified by Charles Galant on 06/26/15
-//  
+//  Modified by Benoit Debled on 09/05/16
 //
 //  Released into the public domain.
 //  http://github.com/millerlp/DS1631
@@ -92,11 +92,75 @@ uint8_t DS1631::readConfig(){
     return _data;
 }
 
+// Set the polarity of the Tout pin
+// If b is true, Tout will be active high
+// Otherwise, Tout will be avtive low
+void DS1631::setActiveHigh(bool b){
+    uint8_t config = readConfig();
+    if(b){
+        writeConfig(config | (1 << 1));
+    }
+    else{
+        writeConfig(config & ~(1 << 1));
+    }
+}
+
+// Set to One-Shot mode or Continuous Conversion Mode
+void DS1631::setOneShotMode(bool b){
+    uint8_t config = readConfig();
+    if(b){
+        writeConfig(config | (1 << 0));
+    }
+    else{
+        writeConfig(config & ~(1 << 0));
+    }
+}
+
+// Set resolution between 9 bits and 12 bits
+// 9 bits resolution will take a maximum of 93.75 ms to convert
+// 10 bits resolution will take a maximum of 187.5 ms to convert
+// 11 bits resolution will take a maximum of 375 ms to convert
+// 12 bits resolution will take a maximum of 750 ms to convert
+void DS1631::setResolution(byte res){
+    if(res >= 9 && res <=12){
+        uint8_t config = readConfig();
+        res = res - 9;
+        writeConfig(config | (res << 2));
+    }
+}
+
+// Request the TH temperature from the DS1631
+float DS1631::readTH(){
+    readTemperature(0xA1);
+    return byteToFloat(); // return floating temperature
+}
+
+// Request the TL temperature from the DS1631
+float DS1631::readTL(){
+    readTemperature(0xA2);
+    return byteToFloat();
+}
+
+// Request a temperature reading from the DS1631
+void DS1631::readT(){
+    readTemperature(0xAA);
+}
+
+// Write the TH temperature to the DS1631
+void DS1631::writeTH(float f){
+    writeTemperature(f, 0xA1);
+}
+
+// Write the TL temperature to the DS1631
+void DS1631::writeTL(float f){
+    writeTemperature(f, 0xA2);
+}
+
 // Request a temperature reading from the DS1631
 // The high and low bytes are saved
-void DS1631::readT(){
+void DS1631::readTemperature(byte command){
     Wire.beginTransmission(_address);
-    Wire.write(0xAA); // AA : Request Temperature
+    Wire.write(command);
     Wire.endTransmission();
     Wire.requestFrom(_address,2); // READ 2 bytes
     Wire.available(); // 1st byte
@@ -105,12 +169,28 @@ void DS1631::readT(){
     LSByte = Wire.read(); // read a byte
 }
 
+// Request a temperature writing to the DS1631
+void DS1631::writeTemperature(float f, byte command){
+    floatToByte(f);
+    stopConversion(); 
+    Wire.beginTransmission(_address);
+    Wire.write(command);
+    Wire.write(MSByte);
+    Wire.write(LSByte);
+    Wire.endTransmission();
+    startConversion();
+}
+
 // Read the temperature and return a floating point
 // temperature value, in degrees Celsius
 float DS1631::readTempF(){
-    int T_dec;
-    double T;
     readT();
+    return byteToFloat();
+}
+
+// Conversion of a temperature (2 bytes) to a float
+float DS1631::byteToFloat(){
+    double T;
     // T° processing. Shift the LSByte right 4 positions
     // The resulting binary value, converted to base-10 
     // and multiplied by 0.0625, is the decimal part of 
@@ -124,8 +204,8 @@ float DS1631::readTempF(){
     // negative temperature value, so you must 
     // subtract off 256 to get the whole number
     // value. 
-	// Negative temperature fix contributed by Jürgen Thierry
-	if(MSByte>=0x80)
+    // Negative temperature fix contributed by Jürgen Thierry
+    if(MSByte>=0x80)
     { //if sign bit is set
         float negMSByte = MSByte - 256;
         T = (float)negMSByte + (float)LSByte*0.0625;
@@ -136,6 +216,14 @@ float DS1631::readTempF(){
     T = (float) MSByte + (float) LSByte*0.0625;
    
     return T;
+}
+
+// Conversion of a float temperature to the 2 bytes register
+// format (see figure 4 in datasheet)
+void DS1631::floatToByte(float f){
+    MSByte = int(f);
+    LSByte = int((f - int(f))/0.0625);
+    LSByte = LSByte<<4;
 }
 
 // Read the temperature in 1-shot mode, with a 

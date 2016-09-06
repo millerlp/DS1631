@@ -22,13 +22,20 @@ public:
     void stopConversion(); // Enter low-power idle mode
     void startConversion(); // Start new temperature reading
     void writeConfig(uint8_t);  // Write configuration registers
+    void setActiveHigh(bool b); // Set the polarity of the Tout pin
+    void setOneShotMode(bool b); // Set to One-Shot mode or Continuous Conversion Mode
+    void setResolution(byte res); // Set resolution between 9 bits and 12 bits
     uint8_t readConfig();   // Read configuration registers
     float readTempF();  // Return floating point temperature 
     int32_t readTempD();  // Return temp as double (Long * 1/16 = °C)
     bool conversionDone();  // Check if new temperature read is done
     float readTempOneShot(); // Read in 1-shot mode, return float
-    
+    float readTH(); // Request the TH temperature from the DS1631
+    float readTL(); // Request the TL temperature from the DS1631
+    void writeTH(float f); // Request the TH temperature from the DS1631
+    void writeTL(float f); // Request the TL temperature from the DS1631
     uint16_t readTempOneShotInt(); // Read 1-shot, return 16-bit integer
+
     // The 16-bit integer returned by readTempOneShotInt()
     // can be split into its high byte and low byte for
     // conversion to a temperature. The low byte should
@@ -61,7 +68,11 @@ public:
     
     
 private:
-    void readT(); 
+    void readT();
+    float byteToFloat(); 
+    void floatToByte(float f);
+    void writeTemperature(float f, byte command);
+    void readTemperature(byte command);
     int _address;
     uint8_t MSByte;
     uint8_t LSByte;
